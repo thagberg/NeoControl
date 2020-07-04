@@ -20,7 +20,7 @@ hvk::Packet gPacket;
 void setup()
 {
     gMatrix.begin();
-    gMatrix.setBrightness(40);
+    gMatrix.setBrightness(100);
     x = y = 0;
 
     gHost = new hvk::Host(kWidth, kHeight);
@@ -29,33 +29,22 @@ void setup()
 
 void loop()
 {
-
     bool packetComplete = gHost->checkForPacket(gPacket);
     if (packetComplete)
     {
-        // gMatrix.fillScreen(0);
+        uint8_t pixelsUpdated;
         for (size_t i = 0; i < gPacket.height; ++i)
         {
             for (size_t j = 0; j < gPacket.width; ++j)
             {
                 hvk::Color pixelColor = gPacket.colors[i * gPacket.width + j];
                 gMatrix.drawPixel(j, i, gMatrix.Color(pixelColor.r, pixelColor.g, pixelColor.b));
+                ++pixelsUpdated;
             }
         }
-        memset(gPacket.colors, 0, 256);
-    }
 
-    // gMatrix.drawPixel(x, y, gMatrix.Color(255, 0, 0));
-    // x++;
-    // if (x >= 5)
-    // {
-    //     x = 0;
-    //     y++;
-    //     if (y >= 8)
-    //     {
-    //         y = 0;
-    //     }
-    // }
+        gHost->acknowledgePacket(pixelsUpdated);
+    }
 
     gMatrix.show();
     delay(16);
